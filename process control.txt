@@ -1,0 +1,59 @@
+#include<sys/types.h>
+#include<wait.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<signal.h>
+#include<stdlib.h>
+typedef void (*sighandler_t)(int);
+void sigcat()
+{
+	
+}
+int main()
+{
+	int i;
+	int pid,pid1;
+	int status;
+	signal(SIGINT,(sighandler_t)sigcat);
+	//while(1)
+  {
+  
+	char *args[]={"/bin/ls",NULL,NULL};
+	char *argu[]={"/bin/ps",NULL,NULL};
+	pid=fork();
+	if(pid<0)
+	{
+	printf("create process fail!");
+	exit(EXIT_FAILURE);
+	}
+	if(pid==0)
+	{
+	printf("I am child process %d\nMy father is %d\n",getpid(),getppid());
+	pause();
+	status=execve(args[0],args,NULL);
+	}
+	else
+	{
+	printf("\ni am parent process  %d\n",getpid());
+	pid1=fork();
+	if(pid1<0)
+	{
+	printf("create process fail!");
+	exit(EXIT_FAILURE);
+	}
+	if(pid1==0)	
+	{
+	printf("I am child process %d\nMy father is %d\n",getpid(),getppid());
+	pause();
+	status=execve(argu[0],argu,NULL);
+	}
+	}
+	sleep(3);
+	kill(pid1,SIGINT);
+	waitpid(pid1,&status,0);
+	kill(pid,SIGINT);
+	waitpid(pid,&status,0);
+  }
+	return EXIT_SUCCESS;
+
+}
